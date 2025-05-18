@@ -3,8 +3,6 @@ import * as THREE from 'three'; // Necesario para THREE.Vector3
 import { getCueBall, getBalls, resetBall, getBallRadius } from './balls.js';
 import { getCueController, getIsTriggerDown } from './controllers.js';
 import { getCushionMaterial } from './physics.js';
-import * as CANNON from 'cannon';
-import * as THREE from 'three'; // Necesario para THREE.Vector3 y Vector2
 import { getCueBall, getBalls, resetBall, getBallRadius } from './balls.js';
 import { getCueController, getIsTriggerDown } from './controllers.js';
 import { getCushionMaterial } from './physics.js';
