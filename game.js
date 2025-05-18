@@ -3,9 +3,6 @@ import * as THREE from 'three'; // Necesario para THREE.Vector3
 import { getCueBall, getBalls, resetBall, getBallRadius } from './balls.js';
 import { getCueController, getIsTriggerDown } from './controllers.js';
 import { getCushionMaterial } from './physics.js';
-import { getCueBall, getBalls, resetBall, getBallRadius } from './balls.js';
-import { getCueController, getIsTriggerDown } from './controllers.js';
-import { getCushionMaterial } from './physics.js';
 import { tableSurfaceY, tableWidth, tableHeight } from './table.js'; // Importar constantes de table.js
 import { updateScoreDisplay, displayMessage } from './ui.js'; // Importar funciones de UI
 

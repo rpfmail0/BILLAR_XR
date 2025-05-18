@@ -132,4 +132,8 @@ Una vez que el `git push` se complete exitosamente, GitHub Pages detectará los 
 
 Cuando el despliegue esté completo, vuelve a cargar la página en el navegador de tu visor Meta Quest.
 
-
+Resumiendo:
+git status
+git add .
+git commit -m "Ultima correccion"
+git push origin master
