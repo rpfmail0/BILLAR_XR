@@ -66,7 +66,7 @@ const tableSurfaceY = -0.4; // Mantener altura baja
 export function createTable() {
     console.log("Creando mesa de billar (Visual + Física)...");
 
-    export const tableGroup = new THREE.Group(); // Exportar tableGroup
+    const tableGroup = new THREE.Group(); // Exportar tableGroup
     tableGroup.position.set(0, tableSurfaceY, -1.5);
     setTableGroup(tableGroup); // Guardar referencia en scene.js
 
