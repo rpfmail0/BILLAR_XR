@@ -34,7 +34,7 @@ Aquí tienes una guía paso a paso sobre cómo subir tu proyecto de código WebX
 
 1.  Ve a [github.com](https://github.com/) e inicia sesión en tu cuenta.
 2.  Haz clic en el botón "+" en la esquina superior derecha y selecciona "New repository".
-3.  Dale un nombre a tu repositorio (por ejemplo, `billar-webxr`).
+3.  Dale un nombre a tu repositorio (por ejemplo, `BILLAR_XR`).
 4.  Puedes añadir una descripción opcional.
 5.  Elige si quieres que el repositorio sea público o privado. Para desplegar con GitHub Pages de forma sencilla, un repositorio público es lo más directo.
 6.  No inicialices el repositorio con un README, .gitignore o licencia en este paso, ya que ya tienes archivos locales.
@@ -42,17 +42,17 @@ Aquí tienes una guía paso a paso sobre cómo subir tu proyecto de código WebX
 
 **Paso 3: Conectar el Repositorio Local con el Remoto y Subir el Código**
 
-1.  Después de crear el repositorio en GitHub, verás una página con instrucciones. Copia la URL del repositorio remoto (debería ser algo como `https://github.com/tu-usuario/billar-webxr.git`).
+1.  Después de crear el repositorio en GitHub, verás una página con instrucciones. Copia la URL del repositorio remoto (debería ser algo como `https://github.com/rpfmail0/BILLAR_XR.git`).
 2.  En tu terminal local, añade el repositorio remoto a tu configuración Git:
     ```bash
-    git remote add origin https://github.com/tu-usuario/billar-webxr.git
+    git remote add origin https://github.com/rpfmail0/BILLAR_XR.git
     ```
-    (Reemplaza `https://github.com/tu-usuario/billar-webxr.git` con la URL que copiaste).
+    
 3.  Sube tus archivos locales al repositorio remoto:
     ```bash
-    git push -u origin main
+    git push -u origin master
     ```
-    (Si tu rama principal se llama `master` en lugar de `main`, usa `git push -u origin master`).
+    (Si tu rama principal se llama `main` en lugar de `master`, usa `git push -u origin main`).
 
 **Paso 4: Desplegar con GitHub Pages**
 
@@ -61,15 +61,75 @@ Aquí tienes una guía paso a paso sobre cómo subir tu proyecto de código WebX
 3.  En la sección "Build and deployment", bajo "Source", selecciona "Deploy from a branch".
 4.  Bajo "Branch", selecciona la rama que contiene tu código (generalmente `main` o `master`) y la carpeta (`/ (root)`).
 5.  Haz clic en "Save".
-6.  GitHub Pages desplegará tu proyecto. Esto puede tardar unos minutos. Una vez desplegado, verás un mensaje en la parte superior de la sección "GitHub Pages" indicando la URL de tu sitio web (será algo como `https://tu-usuario.github.io/billar-webxr/`).
+6.  GitHub Pages desplegará tu proyecto. Esto puede tardar unos minutos. Una vez desplegado, verás un mensaje en la parte superior de la sección "GitHub Pages" indicando la URL de tu sitio web (será algo como `https://rpfmail0.github.io/BILLAR_XR/`).
 
 **Paso 5: Ejecutar como Experiencia WebXR en Visores Meta Quest**
 
 1.  En tu visor Meta Quest, abre el navegador Meta Quest Browser.
-2.  Introduce la URL de tu sitio web de GitHub Pages (`https://tu-usuario.github.io/billar-webxr/`) en la barra de direcciones y navega a ella.
+2.  Introduce la URL de tu sitio web de GitHub Pages (`https://rpfmail0.github.io/BILLAR_XR/`) en la barra de direcciones y navega a ella.
 3.  Una vez que la página cargue, deberías ver el contenido de tu archivo `BILLAR - Realidad Mixta en Quest3 - version 58 - ultimo intento.htm`.
 4.  Busca el botón "ENTER AR" (o similar, dependiendo de cómo lo hayas implementado con `ARButton`). Haz clic en él.
 5.  El navegador te pedirá permiso para acceder a la Realidad Mixta. Acepta los permisos.
 6.  Si todo está configurado correctamente, la experiencia WebXR de tu juego de billar debería iniciarse en tu visor Meta Quest, utilizando el passthrough para mostrar tu entorno real con la mesa de billar superpuesta.
 
-¡Y eso es todo! Ahora tienes tu proyecto WebXR desplegado y accesible para probar en tu visor Meta Quest. Recuerda que cualquier cambio futuro en tu código requerirá que hagas `git add`, `git commit` y `git push` a tu repositorio de GitHub para actualizar el despliegue de GitHub Pages.
+¡Y eso es todo! Ahora tienes tu proyecto WebXR desplegado y accesible para probar en tu visor Meta Quest. 
+
+
+
+Luego para depurar errores con las Quest3 las conecto al ordenador y ejecuto en navegadro Chrome del PC 
+chrome://inspect/#devices
+
+En las Quest debo autorizar el acceso y ya ver la pagina que está ejecutandose en las Quest y asi podre ir a Consola y ver los fallos para transmitirle a la IA
+
+
+
+Por ultimo para actualizar los cambios en github:
+
+
+El usuario pregunta cómo actualizar el despliegue en GitHub Pages. Esto implica explicar el proceso de Git para confirmar los cambios locales y subirlos al repositorio remoto. GitHub Pages se despliega automáticamente desde la rama configurada (en este caso, `main` o `master`) cada vez que hay nuevos commits en esa rama.
+
+Los pasos son:
+1.  Verificar el estado de los archivos modificados.
+2.  Añadir los archivos modificados al área de preparación.
+3.  Confirmar los cambios.
+4.  Subir los cambios al repositorio remoto en GitHub.
+
+Puedo proporcionar estos pasos como instrucciones de línea de comandos. No necesito usar ninguna herramienta para realizar acciones, solo proporcionar información.Para actualizar el despliegue en GitHub Pages, simplemente necesitas confirmar los cambios que hemos hecho localmente y subirlos a tu repositorio de GitHub. GitHub Pages detectará automáticamente los nuevos commits en la rama que configuraste para el despliegue y actualizará el sitio web.
+
+Aquí tienes los comandos de Git que necesitas ejecutar en tu terminal, dentro de la carpeta de tu proyecto (`c:/BILLAR XR - IA`):
+
+1.  **Verifica el estado de tus archivos:**
+    Este comando te mostrará qué archivos han sido modificados.
+    ```bash
+    git status
+    ```
+    Deberías ver `index.htm` (o `index.html` si lo renombraste) y los archivos `.js` que modificamos listados como "modified".
+
+2.  **Añade los archivos modificados al área de preparación:**
+    Esto prepara los cambios para ser confirmados. Puedes añadir archivos individualmente o todos a la vez.
+    ```bash
+    git add index.htm main.js scene.js physics.js table.js balls.js controllers.js game.js ui.js
+    ```
+    O para añadir todos los archivos modificados y nuevos:
+    ```bash
+    git add .
+    ```
+
+3.  **Confirma los cambios:**
+    Crea un nuevo commit con un mensaje que describa los cambios realizados (por ejemplo, "Fix cannon import and add UI").
+    ```bash
+    git commit -m "Fix cannon import and integrate basic UI"
+    ```
+
+4.  **Sube los cambios a GitHub:**
+    Envía tus commits locales al repositorio remoto en GitHub.
+    ```bash
+    git push origin main
+    ```
+    (Usa `git push origin master` si `master` es tu rama principal).
+
+Una vez que el `git push` se complete exitosamente, GitHub Pages detectará los nuevos commits en la rama `main` (o `master`) y comenzará el proceso de redespliegue. Esto puede tardar uno o dos minutos. Puedes verificar el estado del despliegue en la pestaña "Actions" o en la sección "Pages" de la configuración de tu repositorio en GitHub.
+
+Cuando el despliegue esté completo, vuelve a cargar la página en el navegador de tu visor Meta Quest.
+
+
