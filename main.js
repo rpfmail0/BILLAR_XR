@@ -1,6 +1,6 @@
-import { initScene, getScene, getCamera, getRenderer, onWindowResize, setTableGroup } from './scene.js';
+import { initScene, getScene, getCamera, getRenderer, onWindowResize, setTableGroup, getTableGroup } from './scene.js';
 import { initPhysics, getWorld, stepPhysics } from './physics.js';
-import { createTable, getTableGroup } from './table.js';
+import { createTable } from './table.js';
 import { createBalls, getBalls } from './balls.js';
 import { setupControllers } from './controllers.js';
 import { checkBallsFallen, checkStrokeEnd, onCollision } from './game.js';
