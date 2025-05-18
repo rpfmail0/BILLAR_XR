@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>WebXR Billar Passthrough (Paso Final - Física Completa)</title> <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <style>
+        body { margin: 0; overflow: hidden; font-family: monospace; background-color: #000; }
+        canvas { display: block; }
+        #ar-button { /* Style for the AR button */
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 999;
+        }
+        #ui-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 999;
+            color: white;
+            font-size: 1.2em;
+            text-shadow: 2px 2px 4px #000000;
+        }
+        #score-display {
+            margin-bottom: 10px;
+        }
+     </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+    <div id="ui-container">
+        <div id="score-display">Puntuación: 0</div>
+        <div id="message-display"></div>
+    </div>
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
+

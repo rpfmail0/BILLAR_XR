@@ -1,0 +1,75 @@
+El usuario ha cambiado de tarea. Ahora solicita una guía paso a paso para subir el proyecto a GitHub, desplegarlo (usando GitHub Pages como ejemplo) y ejecutarlo en un visor Meta Quest.
+
+Esta tarea no implica modificar el código existente, sino proporcionar instrucciones sobre el flujo de trabajo de desarrollo y despliegue.
+
+Puedo proporcionar esta guía utilizando mis conocimientos generales sobre Git, GitHub, GitHub Pages y WebXR en Meta Quest. No necesito usar ninguna herramienta para realizar acciones en el código o el sistema de archivos, ya que la solicitud es puramente informativa.
+
+La guía debe cubrir los siguientes puntos:
+1.  Inicializar un repositorio Git local.
+2.  Crear un repositorio en GitHub.
+3.  Conectar el repositorio local con el remoto y subir el código.
+4.  Configurar GitHub Pages para desplegar el proyecto.
+5.  Acceder al proyecto desplegado desde un visor Meta Quest.
+
+Estructuraré la respuesta como una guía paso a paso clara y concisa.
+Aquí tienes una guía paso a paso sobre cómo subir tu proyecto de código WebXR a un repositorio de GitHub, desplegarlo usando GitHub Pages y ejecutarlo en un visor Meta Quest:
+
+**Paso 1: Inicializar un Repositorio Git Local**
+
+1.  Abre la terminal o línea de comandos en la carpeta raíz de tu proyecto (`c:/BILLAR XR - IA`).
+2.  Inicializa un nuevo repositorio Git local ejecutando:
+    ```bash
+    git init
+    ```
+3.  Añade todos los archivos de tu proyecto al área de preparación:
+    ```bash
+    git add .
+    ```
+4.  Confirma los cambios con un mensaje descriptivo:
+    ```bash
+    git commit -m "Initial commit: Proyecto Billar WebXR"
+    ```
+
+**Paso 2: Crear un Repositorio en GitHub**
+
+1.  Ve a [github.com](https://github.com/) e inicia sesión en tu cuenta.
+2.  Haz clic en el botón "+" en la esquina superior derecha y selecciona "New repository".
+3.  Dale un nombre a tu repositorio (por ejemplo, `billar-webxr`).
+4.  Puedes añadir una descripción opcional.
+5.  Elige si quieres que el repositorio sea público o privado. Para desplegar con GitHub Pages de forma sencilla, un repositorio público es lo más directo.
+6.  No inicialices el repositorio con un README, .gitignore o licencia en este paso, ya que ya tienes archivos locales.
+7.  Haz clic en "Create repository".
+
+**Paso 3: Conectar el Repositorio Local con el Remoto y Subir el Código**
+
+1.  Después de crear el repositorio en GitHub, verás una página con instrucciones. Copia la URL del repositorio remoto (debería ser algo como `https://github.com/tu-usuario/billar-webxr.git`).
+2.  En tu terminal local, añade el repositorio remoto a tu configuración Git:
+    ```bash
+    git remote add origin https://github.com/tu-usuario/billar-webxr.git
+    ```
+    (Reemplaza `https://github.com/tu-usuario/billar-webxr.git` con la URL que copiaste).
+3.  Sube tus archivos locales al repositorio remoto:
+    ```bash
+    git push -u origin main
+    ```
+    (Si tu rama principal se llama `master` en lugar de `main`, usa `git push -u origin master`).
+
+**Paso 4: Desplegar con GitHub Pages**
+
+1.  En tu repositorio de GitHub, ve a la pestaña "Settings".
+2.  En el menú lateral izquierdo, haz clic en "Pages".
+3.  En la sección "Build and deployment", bajo "Source", selecciona "Deploy from a branch".
+4.  Bajo "Branch", selecciona la rama que contiene tu código (generalmente `main` o `master`) y la carpeta (`/ (root)`).
+5.  Haz clic en "Save".
+6.  GitHub Pages desplegará tu proyecto. Esto puede tardar unos minutos. Una vez desplegado, verás un mensaje en la parte superior de la sección "GitHub Pages" indicando la URL de tu sitio web (será algo como `https://tu-usuario.github.io/billar-webxr/`).
+
+**Paso 5: Ejecutar como Experiencia WebXR en Visores Meta Quest**
+
+1.  En tu visor Meta Quest, abre el navegador Meta Quest Browser.
+2.  Introduce la URL de tu sitio web de GitHub Pages (`https://tu-usuario.github.io/billar-webxr/`) en la barra de direcciones y navega a ella.
+3.  Una vez que la página cargue, deberías ver el contenido de tu archivo `BILLAR - Realidad Mixta en Quest3 - version 58 - ultimo intento.htm`.
+4.  Busca el botón "ENTER AR" (o similar, dependiendo de cómo lo hayas implementado con `ARButton`). Haz clic en él.
+5.  El navegador te pedirá permiso para acceder a la Realidad Mixta. Acepta los permisos.
+6.  Si todo está configurado correctamente, la experiencia WebXR de tu juego de billar debería iniciarse en tu visor Meta Quest, utilizando el passthrough para mostrar tu entorno real con la mesa de billar superpuesta.
+
+¡Y eso es todo! Ahora tienes tu proyecto WebXR desplegado y accesible para probar en tu visor Meta Quest. Recuerda que cualquier cambio futuro en tu código requerirá que hagas `git add`, `git commit` y `git push` a tu repositorio de GitHub para actualizar el despliegue de GitHub Pages.
