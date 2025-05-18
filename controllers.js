@@ -3,7 +3,7 @@ import * as CANNON from 'cannon'; // Necesario para CANNON.Vec3
 import { getRenderer, getScene } from './scene.js';
 import { shootBall } from './game.js'; // Importar la función de disparo
 import { getCueBall, getBallRadius } from './balls.js'; // Importar getCueBall y getBallRadius
-import { getTableGroup } from './table.js'; // Importar getTableGroup
+import { getTableGroup } from './scene.js'; // Importar getTableGroup
 
 let controller1, controller2;
 let cueController = null; // Se asignará al controller2
