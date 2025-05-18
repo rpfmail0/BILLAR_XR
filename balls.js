@@ -9,7 +9,7 @@ let cueBall;
 let initialBallPositions = {};
 
 // Constants (Relacionadas con las bolas)
-const ballRadius = 0.03075;
+var ballRadius = 0.03075;
 const ballMass = 0.21;
 const tableSurfaceY = -0.4; // Necesario para la posición inicial de las bolas
 

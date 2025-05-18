@@ -6,8 +6,8 @@ import { addBodyToWorld, getTableMaterial, getCushionMaterial } from './physics.
 const tableParts = [];
 
 // Rutas de las texturas (asegúrate de que estos archivos existan)
-const feltTexturePath = './felt_texture.jpg';
-const woodTexturePath = './wood_texture.jpg';
+// const feltTexturePath = './felt_texture.jpg';
+// const woodTexturePath = './wood_texture.jpg';
 
 // Cargador de texturas
 const textureLoader = new THREE.TextureLoader();
@@ -17,6 +17,7 @@ let feltTexture = null;
 let woodTexture = null;
 
 // Cargar texturas
+/*
 textureLoader.load(feltTexturePath, (texture) => {
     feltTexture = texture;
     feltTexture.wrapS = THREE.RepeatWrapping;
@@ -32,7 +33,9 @@ textureLoader.load(feltTexturePath, (texture) => {
 }, undefined, (err) => {
     console.error('Error cargando textura de tapete:', err);
 });
+*/
 
+/*
 textureLoader.load(woodTexturePath, (texture) => {
     woodTexture = texture;
     woodTexture.wrapS = THREE.RepeatWrapping;
@@ -52,6 +55,7 @@ textureLoader.load(woodTexturePath, (texture) => {
 }, undefined, (err) => {
     console.error('Error cargando textura de madera:', err);
 });
+*/
 
 
 
