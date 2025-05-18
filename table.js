@@ -56,12 +56,12 @@ textureLoader.load(woodTexturePath, (texture) => {
 
 
 // Constants (Relacionadas con la mesa)
-const tableWidth = 1.42;
-const tableHeight = 2.84;
+export const tableWidth = 1.42;
+export const tableHeight = 2.84;
 const tableThickness = 0.01;
 const cushionHeight = 0.05;
 const cushionWidth = 0.05;
-const tableSurfaceY = -0.4; // Mantener altura baja
+export const tableSurfaceY = -0.4; // Mantener altura baja
 
 export function createTable() {
     console.log("Creando mesa de billar (Visual + Física)...");
