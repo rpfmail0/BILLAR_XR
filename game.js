@@ -28,7 +28,6 @@ const pocketPositions = [
     new THREE.Vector2(tableWidth / 2, 0), // Centro derecha
     new THREE.Vector2(-tableWidth / 2, 0)  // Centro izquierda
 ];
-const pocketDetectionRadius = getBallRadius() * 1.5; // Radio de detección del bolsillo (ajustar según sea necesario)
 
 
 export function setStrokeInProgress(value) {
@@ -144,6 +143,7 @@ export function onCollision(event) {
 export function checkBallsFallen() {
      const balls = getBalls();
      const ballRadius = getBallRadius();
+     const pocketDetectionRadius = getBallRadius() * 1.5; // Radio de detección del bolsillo (ajustar según sea necesario)
      let needsReset = false;
      // const fallThreshold = tableSurfaceY - ballRadius * 5; // Umbral de caída anterior
 
