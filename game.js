@@ -1,23 +1,23 @@
-import * as CANNON from 'cannon';
-import * as THREE from 'three'; // Necesario para THREE.Vector3
+// No se importa CANNON.js, se asume que Ammo.js está disponible globalmente.
+import * as THREE from 'three'; // Necesario para THREE.Vector3 y THREE.Vector2
 import { getCueBall, getBalls, resetBall, getBallRadius } from './balls.js';
 import { getCueController, getIsTriggerDown } from './controllers.js';
-import { getCushionMaterial } from './physics.js';
+import { getCushionMaterial } from './physics.js'; // Aunque no se use directamente para materiales de contacto, se mantiene por si acaso
 import { tableSurfaceY, tableWidth, tableHeight } from './table.js'; // Importar constantes de table.js
 import { updateScoreDisplay, displayMessage } from './ui.js'; // Importar funciones de UI
 
 // --- Global Variables (Estado del Juego) ---
 let score = 0;
 export let isStrokeInProgress = false;
-let hitYellowAfterStrokeStart = false;
-let hitRedAfterStrokeStart = false;
-let cushionHitsThisStroke = 0;
+let hitYellowAfterStrokeStart = false; // La lógica de colisión está comentada, estas banderas no se actualizarán
+let hitRedAfterStrokeStart = false; // La lógica de colisión está comentada, estas banderas no se actualizarán
+let cushionHitsThisStroke = 0; // La lógica de colisión está comentada, esta variable no se actualizará
 const stopVelocityThreshold = 0.01;
 
 // --- Variables de Estado del Juego Adicionales ---
 let currentPlayer = 1; // Jugador actual (ej. 1 o 2)
-let foulOccurred = false; // Indica si se cometió una falta en el tiro actual
-let firstBallHit = null; // La primera bola de color golpeada por la bola blanca
+let foulOccurred = false; // Indica si se cometió una falta en el tiro actual (la detección de faltas está comentada)
+let firstBallHit = null; // La primera bola de color golpeada por la bola blanca (la detección de colisión está comentada)
 
 // Definir posiciones de los bolsillos (en coordenadas locales de la mesa)
 const pocketPositions = [
@@ -34,23 +34,24 @@ export function setStrokeInProgress(value) {
     isStrokeInProgress = value;
 }
 
-// shootBall Function - CON COMPROBACIÓN isQuiet MODIFICADA
+// shootBall Function - Adaptada para Ammo.js
 export function shootBall(impulse, hitOffset) {
-    console.log("--- Entrando a shootBall() ---");
+    console.log("--- Entrando a shootBall() con Ammo.js ---");
     const cueBall = getCueBall();
     const balls = getBalls();
     if (!cueBall || !cueBall.body) { console.error("Error: cueBall o cueBall.body no definido."); return; }
     console.log("Estado actual: isStrokeInProgress =", isStrokeInProgress);
 
-    // Comprobación de quietud MÁS PERMISIVA
+    // Comprobación de quietud (Adaptada para Ammo.js)
     let allQuiet = true;
     const quietCheckThreshold = 0.3; // Umbral relajado
     balls.forEach((b, index) => {
         if (!b || !b.body) { console.warn(`Advertencia: Falta body para bola ${index} en chequeo isQuiet.`); return; }
-        const sleep = b.body.sleepState === CANNON.Body.SLEEPING;
+        // En Ammo, el estado de activación 1 es ISLAND_SLEEPING
+        const sleep = b.body.getActivationState() === 1;
         if (sleep) { return; }
-        const vel = b.body.velocity.lengthSquared();
-        if (vel > quietCheckThreshold) { allQuiet = false; }
+        const vel = b.body.getLinearVelocity().length(); // Obtener magnitud de velocidad lineal
+        if (vel * vel > quietCheckThreshold * quietCheckThreshold) { allQuiet = false; } // Comparar magnitudes al cuadrado
     });
     console.log("Resultado de isQuiet (Umbral Relajado):", allQuiet);
 
@@ -60,86 +61,58 @@ export function shootBall(impulse, hitOffset) {
         return;
     }
 
-    // Aplicar Impulso con el vector de impulso y hitOffset calculados en controllers.js
+    // Aplicar Impulso con el vector de impulso y hitOffset calculados en controllers.js (Adaptado para Ammo.js)
     console.log("Aplicando impulso:", impulse, "con hitOffset:", hitOffset);
     try {
-        cueBall.body.wakeUp();
-        cueBall.body.applyImpulse(impulse, hitOffset);
+        // impulse y hitOffset vienen como CANNON.Vec3 o similar, convertirlos a Ammo.btVector3
+        const ammoImpulse = new Ammo.btVector3(impulse.x, impulse.y, impulse.z);
+        const ammoHitOffset = new Ammo.btVector3(hitOffset.x, hitOffset.y, hitOffset.z);
+
+        cueBall.body.activate(); // Activar cuerpo para aplicar impulso
+        cueBall.body.applyImpulse(ammoImpulse, ammoHitOffset); // Aplicar impulso
+
+        // Liberar memoria de los vectores de Ammo creados temporalmente
+        Ammo.destroy(ammoImpulse);
+        Ammo.destroy(ammoHitOffset);
+
+
         console.log("Impulso aplicado a cueBall.body.");
         displayMessage("Tiro en progreso..."); // Mostrar mensaje en UI
-    } catch(e) { console.error("¡Error al aplicar impulso!", e); return; }
+    } catch(e) { console.error("¡Error al aplicar impulso con Ammo.js!", e); return; }
 
     // Iniciar seguimiento del tiro
     isStrokeInProgress = true;
-    hitYellowAfterStrokeStart = false;
-    hitRedAfterStrokeStart = false;
-    cushionHitsThisStroke = 0;
-    foulOccurred = false; // Resetear falta al inicio del tiro
-    firstBallHit = null; // Resetear primera bola golpeada al inicio del tiro
+    hitYellowAfterStrokeStart = false; // No se actualizará sin lógica de colisión
+    hitRedAfterStrokeStart = false; // No se actualizará sin lógica de colisión
+    cushionHitsThisStroke = 0; // No se actualizará sin lógica de colisión
+    foulOccurred = false; // No se actualizará sin lógica de colisión
+    firstBallHit = null; // No se actualizará sin lógica de colisión
 
     console.log(`¡Disparo Realizado! Stroke iniciado.`);
     console.log("--- Saliendo de shootBall() ---");
 }
 
-// onCollision Function - Necesaria para lógica de puntuación
+// onCollision Function - COMENTADA TEMPORALMENTE (Requiere re-implementación con Ammo.js)
+/*
 export function onCollision(event) {
      // Solo procesar colisiones si un tiro está en progreso
      if (!isStrokeInProgress) return;
 
-     const bodyA = event.contact.bi;
-     const bodyB = event.contact.bj;
-     const cueBall = getCueBall();
-     const balls = getBalls();
-     const cushionMaterial = getCushionMaterial();
-     const isTriggerDown = getIsTriggerDown(); // Obtener estado del gatillo
+     // La lógica de colisión de Ammo.js es diferente.
+     // Se necesita iterar sobre el despachador de colisiones en cada paso de simulación.
+     // Esta función no se usará directamente con Ammo.js de la misma manera que con CANNON.js.
 
-     const whiteBallBody = cueBall?.body;
-     const yellowBallBody = balls.find(b => b.name === 'yellow')?.body;
-     const redBallBody = balls.find(b => b.name === 'red')?.body;
-     // Necesitamos el cuerpo del taco para detectar doble golpe
-     // Asumiendo que el cuerpo del taco se añade al mundo físico y se puede identificar
-     // Por ahora, usaremos una detección simplificada basada en el estado del gatillo y colisión con la blanca.
+     console.log("onCollision llamada (comentada para Ammo.js)");
 
-     if (!whiteBallBody || !yellowBallBody || !redBallBody || !cushionMaterial) return;
-
-     // --- Detección de Faltas ---
-
-     // Falta: Doble Golpe (si el gatillo sigue apretado y la blanca colisiona con algo)
-     // Esta es una simplificación. Una detección más precisa requeriría un cuerpo físico para el taco.
-     if (isTriggerDown && (bodyA === whiteBallBody || bodyB === whiteBallBody)) {
-         console.warn("¡FALTA: Posible Doble Golpe detectado!");
-         foulOccurred = true;
-         displayMessage("¡FALTA: Doble Golpe!"); // Mostrar mensaje en UI
-         // No retornar inmediatamente para permitir que se detecten otras colisiones (ej. primera bola golpeada)
-     }
-
-
-     // --- Rastrear Primera Bola Golpeada por la Blanca ---
-     // Solo si la colisión involucra a la bola blanca y una bola de color, y aún no hemos registrado la primera bola.
-     if ((bodyA === whiteBallBody || bodyB === whiteBallBody) && (bodyA === yellowBallBody || bodyB === yellowBallBody || bodyA === redBallBody || bodyB === redBallBody)) {
-         if (firstBallHit === null) {
-             if (bodyA === whiteBallBody) {
-                 firstBallHit = balls.find(b => b.body === bodyB)?.name;
-             } else { // bodyB === whiteBallBody
-                 firstBallHit = balls.find(b => b.body === bodyA)?.name;
-             }
-             console.log("Primera bola golpeada por la blanca:", firstBallHit);
-             // Opcional: Mostrar en UI la primera bola golpeada
-             // displayMessage(`Primera bola golpeada: ${firstBallHit.toUpperCase()}`);
-         }
-     }
-
-
-     // Comprobar colisión con bandas (cushionMaterial)
-     if ((bodyA === whiteBallBody && bodyB.material === cushionMaterial) || (bodyB === whiteBallBody && bodyA.material === cushionMaterial)) {
-         cushionHitsThisStroke++;
-         console.log("Golpe a banda! Total:", cushionHitsThisStroke); // Log temporal
-     }
-     // Las colisiones bola-bola (amarilla/roja) ya se rastrean con hitYellowAfterStrokeStart/hitRedAfterStrokeStart
-     // No necesitamos lógica adicional aquí por ahora, ya que checkStrokeEnd usa estas banderas.
+     // Lógica original (comentada):
+     // const bodyA = event.contact.bi;
+     // const bodyB = event.contact.bj;
+     // ... (resto de la lógica de detección de colisiones y faltas)
 }
+*/
 
-// checkBallsFallen Function - Necesaria
+
+// checkBallsFallen Function - Necesaria (Adaptada para Ammo.js)
 export function checkBallsFallen() {
      const balls = getBalls();
      const ballRadius = getBallRadius();
@@ -149,8 +122,11 @@ export function checkBallsFallen() {
 
      balls.forEach(ball => {
          if (ball && ball.body) {
+             // Obtener la posición del cuerpo de Ammo.js (Ammo.btVector3)
+             const ballBodyPos = ball.body.getCenterOfMassPosition();
+
              // Obtener la posición de la bola en el plano XZ (ignorando Y)
-             const ballPosXZ = new THREE.Vector2(ball.body.position.x, ball.body.position.z);
+             const ballPosXZ = new THREE.Vector2(ballBodyPos.x(), ballBodyPos.z()); // Usar .x() y .z() para acceder a los componentes
 
              // Comprobar si la bola está cerca de algún bolsillo
              let isInPocket = false;
@@ -165,14 +141,15 @@ export function checkBallsFallen() {
              // Si la bola está en un bolsillo Y ha caído por debajo de la superficie de la mesa
              // (para evitar detecciones falsas si la bola está justo encima de un bolsillo pero no ha caído)
              // También comprobamos si la bola está por debajo de un umbral Y general como respaldo
-             if ((isInPocket || ball.body.position.y < tableSurfaceY - ballRadius * 5) && ball.body.position.y < tableSurfaceY - ballRadius) { // Ajustar umbral Y si es necesario
+             if ((isInPocket || ballBodyPos.y() < tableSurfaceY - ballRadius * 5) && ballBodyPos.y() < tableSurfaceY - ballRadius) { // Usar .y() para acceder al componente Y
                  console.log(`¡Bola ${ball.name.toUpperCase()} cayó en un bolsillo o fuera de la mesa! Reseteando.`);
                  resetBall(ball); // Usar la función resetBall del módulo balls
                  needsReset = true;
                  // TODO: Implementar lógica de puntuación/falta si una bola cae en un bolsillo (ej. bola blanca = falta)
+                 // La detección de faltas está comentada temporalmente.
                  if (ball.name === 'white') {
-                     console.warn("¡FALTA: Bola blanca cayó en el bolsillo!");
-                     foulOccurred = true;
+                     console.warn("¡FALTA: Bola blanca cayó en el bolsillo! (Detección de falta comentada)");
+                     // foulOccurred = true; // No se actualizará sin lógica de colisión
                      displayMessage("¡FALTA: Bola blanca en el bolsillo!"); // Mostrar mensaje en UI
                  } else {
                      // Lógica para bolas de color embocadas (si aplica en el futuro)
@@ -183,55 +160,50 @@ export function checkBallsFallen() {
      if (needsReset) { isStrokeInProgress = false; }
 }
 
- // checkStrokeEnd Function - Necesaria
+ // checkStrokeEnd Function - Necesaria (Adaptada para Ammo.js)
  export function checkStrokeEnd() {
      if (!isStrokeInProgress) return;
      const balls = getBalls();
-     // Comprobar si TODAS las bolas están dormidas o casi paradas
+     // Comprobar si TODAS las bolas están dormidas o casi paradas (Adaptada para Ammo.js)
      const allStopped = balls.every(b => {
          if (!b || !b.body) return true;
-         return b.body.sleepState === CANNON.Body.SLEEPING || b.body.velocity.lengthSquared() < stopVelocityThreshold
+         // En Ammo, el estado de activación 1 es ISLAND_SLEEPING
+         const sleep = b.body.getActivationState() === 1;
+         if (sleep) { return true; } // Si está dormida, está parada
+
+         // Comprobar velocidad lineal y angular
+         const linearVelocity = b.body.getLinearVelocity().length();
+         const angularVelocity = b.body.getAngularVelocity().length();
+
+         return linearVelocity < stopVelocityThreshold && angularVelocity < stopVelocityThreshold;
      });
 
      if (allStopped) {
          console.log("Tiro finalizado. Comprobando resultado...");
 
-         let madeCarom = false;
+         let madeCarom = false; // No se actualizará sin lógica de colisión
          let message = "";
 
-         if (foulOccurred) {
-             message = "¡FALTA! Turno para el siguiente jugador.";
-             console.log(message);
-             changeTurn();
-         } else {
-             // Comprobar si se hizo carambola a 3 bandas (Blanca -> Amarilla -> Roja + 3 Bandas O Blanca -> Roja -> Amarilla + 3 Bandas)
-             // Simplificación: Solo comprobamos si golpeó ambas bolas de color y al menos 3 bandas.
-             // Una implementación más precisa rastrearía el orden de los golpes.
-             if (hitYellowAfterStrokeStart && hitRedAfterStrokeStart && cushionHitsThisStroke >= 3) {
-                 madeCarom = true;
-                 score++; // Asumiendo que solo hay un jugador o puntuación global por ahora
-                 message = `¡CARAMBOLA A 3 BANDAS! Puntuación: ${score}`;
-                 console.log(message);
-                 // El jugador mantiene el turno si hace carambola
-             } else {
-                 message = "Tiro fallido o carambola no válida. Turno para el siguiente jugador.";
-                 console.log(message);
-                 changeTurn();
-             }
-         }
+         // La lógica de puntuación y faltas depende de la detección de colisiones, que está comentada.
+         // Por ahora, simplemente terminamos el tiro y cambiamos de turno.
 
-         // Actualizar UI con el mensaje y la puntuación
+         message = "Tiro finalizado. Lógica de puntuación/faltas comentada. Turno para el siguiente jugador.";
+         console.log(message);
+         changeTurn();
+
+
+         // Actualizar UI con el mensaje y la puntuación (la puntuación no se actualizará sin lógica de colisión)
          displayMessage(message);
-         updateScoreDisplay();
+         updateScoreDisplay(); // Esto actualizará la visualización de la puntuación actual (que no cambia)
 
 
          // Resetear estado para el próximo tiro
          isStrokeInProgress = false;
-         hitYellowAfterStrokeStart = false;
-         hitRedAfterStrokeStart = false;
-         cushionHitsThisStroke = 0;
-         foulOccurred = false; // Resetear estado de falta
-         firstBallHit = null; // Resetear primera bola golpeada
+         hitYellowAfterStrokeStart = false; // No se actualizará sin lógica de colisión
+         hitRedAfterStrokeStart = false; // No se actualizará sin lógica de colisión
+         cushionHitsThisStroke = 0; // No se actualizará sin lógica de colisión
+         foulOccurred = false; // No se actualizará sin lógica de colisión
+         firstBallHit = null; // No se actualizará sin lógica de colisión
 
          console.log("Listo para el siguiente tiro. Jugador actual:", currentPlayer);
      }
@@ -246,7 +218,7 @@ export function checkBallsFallen() {
  }
 
  export function getScore() {
-     return score;
+     return score; // La puntuación no se actualizará sin lógica de colisión
  }
 
  export function getCurrentPlayer() {

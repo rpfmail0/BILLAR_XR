@@ -1,23 +1,28 @@
 import { initScene, getScene, getCamera, getRenderer, onWindowResize, setTableGroup, getTableGroup } from './scene.js';
-import { initPhysics, getWorld, stepPhysics } from './physics.js';
+import { initPhysics, getWorld, stepPhysics } from './physics.js'; // initPhysics ahora es async
 import { createTable } from './table.js';
 import { createBalls, getBalls } from './balls.js';
 import { setupControllers } from './controllers.js';
-import { checkBallsFallen, checkStrokeEnd, onCollision } from './game.js';
-import * as CANNON from 'cannon'; // Necesario para añadir el listener de colisión
+import { checkBallsFallen, checkStrokeEnd } from './game.js'; // onCollision ya no se importa/usa directamente
+// No se importa CANNON.js
 
 const timeStep = 1 / 60;
 
 init();
 
-function init() {
-    console.log("Iniciando aplicación WebXR Billar modular...");
+async function init() { // Función init ahora es async
+    console.log("Iniciando aplicación WebXR Billar modular con Ammo.js...");
 
     // Inicializar Scene, Camera, Renderer
     const { scene, camera, renderer } = initScene(document.body);
 
-    // Inicializar Physics World
-    const { world } = initPhysics();
+    // Inicializar Physics World (esperar inicialización de Ammo.js)
+    const physicsResult = await initPhysics();
+    if (!physicsResult) {
+        console.error("Error al inicializar el mundo físico con Ammo.js.");
+        return; // Detener la inicialización si falla la física
+    }
+    const world = physicsResult.world; // Obtener el mundo de Ammo.js
 
     // Crear Mesa
     const tableGroup = createTable();
@@ -29,13 +34,18 @@ function init() {
     // Configurar Controladores
     setupControllers();
 
-    // Añadir listener de colisión a todas las bolas después de crearlas
+    // El listener de colisión se manejaba de forma diferente en CANNON.js.
+    // Con Ammo.js, la detección de colisiones se suele hacer iterando sobre el despachador de colisiones
+    // en el bucle de simulación. La función onCollision en game.js está comentada temporalmente.
+    // Por lo tanto, eliminamos el código que añadía el listener de colisión de CANNON.js.
+    /*
     const balls = getBalls();
     balls.forEach(ball => {
         if (ball && ball.body) {
             ball.body.addEventListener('collide', onCollision);
         }
     });
+    */
 
 
     // Event Listeners
@@ -44,11 +54,14 @@ function init() {
     // Start Animation Loop
     renderer.setAnimationLoop(animate);
 
-    console.log("Inicialización modular completa. Iniciando bucle de animación.");
+    console.log("Inicialización modular con Ammo.js completa. Iniciando bucle de animación.");
 }
 
+// Objeto temporal para la sincronización de Ammo.js
+const transformAux = new Ammo.btTransform();
+
 function animate() {
-    const world = getWorld();
+    const world = getWorld(); // Obtener el mundo de Ammo.js
     const renderer = getRenderer();
     const scene = getScene();
     const camera = getCamera();
@@ -61,24 +74,29 @@ function animate() {
         try { stepPhysics(timeStep); } catch (e) { console.error("Error during stepPhysics():", e); }
     }
 
-    // Sincronizar visuales con física
+    // Sincronizar visuales con física (Adaptado para Ammo.js)
     balls.forEach(ball => {
         if (ball && ball.body && ball.mesh && tableGroup) {
             try {
-                const bodyPos = ball.body.position;
-                if (isNaN(bodyPos.x) || isNaN(bodyPos.y) || isNaN(bodyPos.z)) {
-                     console.warn(`Posición inválida (NaN) detectada para ${ball.name} body ANTES de worldToLocal.`);
-                     return;
-                }
-                const localPos = tableGroup.worldToLocal(bodyPos.position.clone()); // Usar .position para obtener el Vec3 de CANNON
+                // Obtener la transformación del cuerpo rígido de Ammo.js
+                ball.body.getMotionState().getWorldTransform(transformAux);
+                const ammoPos = transformAux.getOrigin();
+                const ammoQuat = transformAux.getRotation();
+
+                // Convertir la posición de Ammo.js (MUNDIAL) a posición LOCAL para la malla
+                const worldPos = new THREE.Vector3(ammoPos.x(), ammoPos.y(), ammoPos.z());
+                const localPos = tableGroup.worldToLocal(worldPos);
+
+                // Aplicar posición y rotación a la malla de Three.js
                 ball.mesh.position.copy(localPos);
-                ball.mesh.quaternion.copy(ball.body.quaternion);
-            } catch(e) { console.error(`Error syncing ball ${ball.name}:`, e); }
+                ball.mesh.quaternion.set(ammoQuat.x(), ammoQuat.y(), ammoQuat.z(), ammoQuat.w());
+
+            } catch(e) { console.error(`Error syncing ball ${ball.name} with Ammo.js:`, e); }
         }
     });
 
 
-    // Comprobar estado del juego
+    // Comprobar estado del juego (funciones adaptadas para Ammo.js)
     try { checkBallsFallen(); checkStrokeEnd(); } catch (e) { console.error("Error during game state checks:", e); }
 
     // Render Scene

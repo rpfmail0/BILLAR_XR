@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import * as CANNON from 'cannon';
+// No se importa CANNON.js, se asume que Ammo.js está disponible globalmente.
 import { getTableGroup, setTableGroup } from './scene.js';
 import { addBodyToWorld, getTableMaterial, getCushionMaterial } from './physics.js';
 
@@ -67,8 +67,9 @@ const cushionHeight = 0.05;
 const cushionWidth = 0.05;
 export const tableSurfaceY = -0.4; // Mantener altura baja
 
+
 export function createTable() {
-    console.log("Creando mesa de billar (Visual + Física)...");
+    console.log("Creando mesa de billar (Visual + Física) con Ammo.js...");
 
     const tableGroup = new THREE.Group(); // Exportar tableGroup
     tableGroup.position.set(0, tableSurfaceY, -1.5);
@@ -85,8 +86,8 @@ export function createTable() {
 function createTableSurface() {
      // console.log("Creando superficie (Visual + Física)...");
      const tableGroup = getTableGroup();
-     const tableMaterial = getTableMaterial();
-     if (!tableGroup || !tableMaterial) { console.error("Dependencias de mesa no cargadas."); return; }
+     const tableMaterialProps = getTableMaterial(); // Obtener propiedades del material de physics.js
+     if (!tableGroup || !tableMaterialProps) { console.error("Dependencias de mesa no cargadas."); return; }
 
      let tableSurfaceMesh;
      try {
@@ -104,17 +105,33 @@ function createTableSurface() {
          tableGroup.add(tableSurfaceMesh);
      } catch(e) { console.error("***** ERROR creando malla de tapete:", e); return; }
 
-     let tableBody;
+     let tableBody = null;
      try {
-         const tableShape = new CANNON.Box(new CANNON.Vec3(tableWidth / 2, tableThickness / 2, tableHeight / 2));
-         tableBody = new CANNON.Body({ mass: 0, material: tableMaterial });
-         tableBody.addShape(tableShape);
-         const tableBodyWorldPos = tableGroup.localToWorld(tableSurfaceMesh.position.clone());
-         tableBody.position.copy(tableBodyWorldPos);
-         tableBody.quaternion.copy(tableGroup.quaternion);
+         // Física Estática (Ammo.js)
+         const tableShape = new Ammo.btBoxShape(new Ammo.btVector3(tableWidth / 2, tableThickness / 2, tableHeight / 2));
+         const mass = 0; // Masa 0 para cuerpo estático
+         const localInertia = new Ammo.btVector3(0, 0, 0); // Inercia local es cero para masa 0
+
+         const startTransform = new Ammo.btTransform();
+         const worldPos = tableGroup.localToWorld(tableSurfaceMesh.position.clone()); // Calcular pos MUNDIAL inicial
+         startTransform.setIdentity();
+         startTransform.setOrigin(new Ammo.btVector3(worldPos.x, worldPos.y, worldPos.z));
+
+         const motionState = new Ammo.btDefaultMotionState(startTransform);
+         const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, tableShape, localInertia);
+
+         // Aplicar propiedades de material (fricción, restitución)
+         rbInfo.set_m_friction(tableMaterialProps.friction);
+         rbInfo.set_m_restitution(tableMaterialProps.restitution);
+
+         tableBody = new Ammo.btRigidBody(rbInfo);
+
+         // Cuerpos estáticos no necesitan ser activados ni dormir
+         tableBody.setActivationState(4); // 4 = DISABLE_DEACTIVATION
+
          addBodyToWorld(tableBody); // Añadir a world usando la función del módulo physics
          tableParts.push({ mesh: tableSurfaceMesh, body: tableBody, type: 'table' });
-     } catch(e) { console.error("***** ERROR creando/añadiendo cuerpo físico de superficie:", e); }
+     } catch(e) { console.error("***** ERROR creando/añadiendo cuerpo físico de superficie con Ammo.js:", e); }
      // console.log("Superficie (Visual+Física) añadida.");
  }
 
@@ -123,8 +140,8 @@ function createTableSurface() {
 function createCushionsAndFrame() {
     // console.log("Creando visuales y física estática de cojines/marco...");
     const tableGroup = getTableGroup();
-    const cushionMaterial = getCushionMaterial();
-    if (!tableGroup || !cushionMaterial) { console.error("Dependencias de cojines no cargadas."); return; }
+    const cushionMaterialProps = getCushionMaterial(); // Obtener propiedades del material de physics.js
+    if (!tableGroup || !cushionMaterialProps) { console.error("Dependencias de cojines no cargadas."); return; }
 
     const cushionYPos = cushionHeight / 2;
     // Usar la textura de madera si está cargada, de lo contrario usar color sólido
@@ -153,34 +170,51 @@ function createCushionsAndFrame() {
              cushionMesh.receiveShadow = true;
              tableGroup.add(cushionMesh);
 
-             // Física Estática
-             const cannonVec = new CANNON.Vec3(posData.geometry.parameters.width / 2, posData.geometry.parameters.height / 2, posData.geometry.parameters.depth / 2);
-             const cushionShape = new CANNON.Box(cannonVec);
-             const cushionBody = new CANNON.Body({ mass: 0, material: cushionMaterial }); // Estático
-             cushionBody.addShape(cushionShape);
-             const worldPos = tableGroup.localToWorld(cushionMesh.position.clone());
-             cushionBody.position.copy(worldPos);
-             cushionBody.quaternion.copy(tableGroup.quaternion);
+             // Física Estática (Ammo.js)
+             const halfExtents = new Ammo.btVector3(posData.geometry.parameters.width / 2, posData.geometry.parameters.height / 2, posData.geometry.parameters.depth / 2);
+             const cushionShape = new Ammo.btBoxShape(halfExtents);
+             const mass = 0; // Masa 0 para cuerpo estático
+             const localInertia = new Ammo.btVector3(0, 0, 0); // Inercia local es cero para masa 0
+
+             const startTransform = new Ammo.btTransform();
+             const worldPos = tableGroup.localToWorld(cushionMesh.position.clone()); // Calcular pos MUNDIAL inicial
+             startTransform.setIdentity();
+             startTransform.setOrigin(new Ammo.btVector3(worldPos.x, worldPos.y, worldPos.z));
+
+             const motionState = new Ammo.btDefaultMotionState(startTransform);
+             const rbInfo = new Ammo.btRigidBodyConstructionInfo(mass, motionState, cushionShape, localInertia);
+
+             // Aplicar propiedades de material (fricción, restitución)
+             rbInfo.set_m_friction(cushionMaterialProps.friction);
+             rbInfo.set_m_restitution(cushionMaterialProps.restitution);
+
+
+             const cushionBody = new Ammo.btRigidBody(rbInfo);
+
+             // Cuerpos estáticos no necesitan ser activados ni dormir
+             cushionBody.setActivationState(4); // 4 = DISABLE_DEACTIVATION
+
+
              // ***** AÑADIR COJINES A WORLD *****
              addBodyToWorld(cushionBody); // Añadir a world usando la función del módulo physics
              tableParts.push({ mesh: cushionMesh, body: cushionBody, type: 'cushion' });
 
-         } catch(e) { console.error(`Error creando/añadiendo cojín ${index+1}:`, e); }
-    });
-    // console.log("Cuerpos físicos de cojines añadidos a world.");
+         } catch(e) { console.error(`Error creando/añadiendo cojín ${index+1} con Ammo.js:`, e); }
+     });
+     // console.log("Cuerpos físicos de cojines añadidos a world.");
 
-    // Base visual (sin física)
-    try {
-         const baseHeight = 0.15;
-         const baseGeometry = new THREE.BoxGeometry(tableWidth + 2 * cushionWidth + 0.1, baseHeight, tableHeight + 2 * cushionWidth + 0.1);
-         const baseMesh = new THREE.Mesh(baseGeometry, woodMaterial); // Usar el mismo material de madera
-         baseMesh.position.y = -tableThickness - baseHeight / 2; // Local
-         baseMesh.castShadow = true;
-         baseMesh.receiveShadow = true;
-         tableGroup.add(baseMesh);
-    } catch(e) { console.error("Error creando base visual:", e); }
-    // console.log("Marco/Bandas (Visual+Física) añadidos.");
-}
+     // Base visual (sin física)
+     try {
+          const baseHeight = 0.15;
+          const baseGeometry = new THREE.BoxGeometry(tableWidth + 2 * cushionWidth + 0.1, baseHeight, tableHeight + 2 * cushionWidth + 0.1);
+          const baseMesh = new THREE.Mesh(baseGeometry, woodMaterial); // Usar el mismo material de madera
+          baseMesh.position.y = -tableThickness - baseHeight / 2; // Local
+          baseMesh.castShadow = true;
+          baseMesh.receiveShadow = true;
+          tableGroup.add(baseMesh);
+     } catch(e) { console.error("Error creando base visual:", e); }
+     // console.log("Marco/Bandas (Visual+Física) añadidos.");
+ }
 
 export function getTableParts() {
     return tableParts;
